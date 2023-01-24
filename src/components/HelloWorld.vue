@@ -95,10 +95,15 @@ export default {
             search[7].innerHTML == xo[i]) ||
           (search[0].innerHTML == xo[i] &&
             search[4].innerHTML == xo[i] &&
-            search[8].innerHTML == xo[i])
+            search[8].innerHTML == xo[i]) ||
+          (search[2].innerHTML == xo[i] &&
+            search[4].innerHTML == xo[i] &&
+            search[6].innerHTML == xo[i])
         ) {
-          // alert("WINNER");
-          this.dialog = true;
+          setTimeout(() => {
+            alert("WINNER");
+          }, 100);
+          // this.dialog = true;
         } else console.log("LOH");
       }
     },
