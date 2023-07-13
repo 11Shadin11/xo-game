@@ -1,27 +1,23 @@
 <template>
   <div id="app">
-    <HelloWorld />
+    <Three />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+// import HelloWorld from './components/HelloWorld.vue';
+// import Game from './components/Game';
+import Three from './components/Three';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld,
+    // HelloWorld,
+    // Game,
+    Three
   },
 };
 </script>
 
 <style>
-#app {
-  width: auto;
-  text-align: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
 </style>

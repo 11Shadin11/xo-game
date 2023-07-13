@@ -222,6 +222,9 @@ input {
   border: 1px solid;
   width: 60px;
   height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .disabledbutton {
   pointer-events: none;
