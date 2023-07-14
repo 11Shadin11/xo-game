@@ -1,119 +1,164 @@
 import * as THREE from 'three';
 
 export default {
-
+  
   init(data) {
+    this.createResize();
+
     this.createRenderer(data);
     this.createCamera();
     this.createScene();
     this.createLight();
 
-    this.update()
-  },
 
+    this.update();
+  },
+  
   createRenderer(settings) {
 
-    const up = 'ArrowUp'
-    const down = 'ArrowDown'
-    const left = 'ArrowLeft'
-    const right = 'ArrowRight'
+    let mouseSize = 0 
 
-    let start = false
+    const cube = settings.object.obj
 
-    const e = settings.object.obj
+    if (this.renderer) {
+      this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
 
-    if(this.renderer) {
-      this.renderer.domElement.parentNode.removeChild(this.renderer.domElement)
-      this.renderer.dispose()
+      this.renderer.dispose();
     }
-    this.renderer = new THREE.WebGLRenderer(settings.renderer)
 
+    this.renderer = new THREE.WebGLRenderer(settings.renderer);
+
+    settings.renderer.parent.appendChild(this.renderer.domElement);
+
+    this.renderer.setClearColor(settings.renderer.clearColor || "black");
+
+    this.renderer.setPixelRatio(settings.renderer.pixelRatio || devicePixelRatio)
+
+    var that = this;
+
+    this.addResize("resize_render", () => {
+      that.renderer.setSize(
+        that.renderer.domElement.parentNode.offsetWidth,
+        that.renderer.domElement.parentNode.offsetHeight
+      );
+    });
+    this.resizePool["resize_render"]();
+
+    
     let canvasRenderer = this.renderer.domElement;
-
+    
     canvasRenderer.id = 'canvas'
-
-    settings.renderer.parent.appendChild(canvasRenderer)
-
-    let canvas = document.getElementById('canvas');
-
+    
+    let canvas = document.getElementById('canvas')
+    
     canvas.tabIndex="1"
     
-    canvas.addEventListener('keydown', (event) => {
-      console.log(e.object.rotation);
-      
-      if(event.key == ' '){
-        start = !start
-        this.addUpdate("rotate-object", ()=> {e.object.rotation.x -= .1})
+    canvas.addEventListener("mousewheel", (event) => {
+      mouseSize = mouseSize + event.deltaY
+      console.log(mouseSize);
+      if(mouseSize > 100 && mouseSize <= 10000 ) {
+        cube.object.position.z = -(mouseSize/100)
       }
-
-      if(start) {
-        switch(event.key){
-          case up: 
-            this.addUpdate("rotate-object", ()=> {e.object.position.x -= .1})
-            break;
-          case down: 
-            this.addUpdate("rotate-object", ()=> {e.object.position.x += .1})
-            break;
-          case left: 
-            this.addUpdate("rotate-object", ()=> {e.object.position.y -= .1})
-            break;
-          case right: 
-            this.addUpdate("rotate-object", ()=> {e.object.position.y += .1})
-            break;
-        }
+      else if (mouseSize > 100) {
+        mouseSize = 200
       }
-      
-      else {
-        this.removeUpdate("rotate-object")
+      else if (mouseSize <= 10000) {
+        mouseSize = 10000
       }
+      // switch (mouseSize) {
+      //   case 100:
+      //     break;
+      //   case 200:
+      //     cube.object.position.z = -2
+      //     break;
+      //   case 300:
+      //     cube.object.position.z = -3
+      //     break;
+      //   case 400:
+      //     cube.object.position.z = -4
+      //     break;
+      //   case 500:
+      //     cube.object.position.z = -5
+      //     break;
+      // }
 
-    });
 
-    this.renderer.setClearColor(settings.clearColor || "green")
-    
-    this.renderer.setPixelRatio(settings.pixelRatio || devicePixelRatio)
+    })
 
-    this.renderer.setSize(document.body.offsetWidth, document.body.offsetHeight)
+
+
   },
+  
+  createResize() {
+    var that = this;
+    window.addEventListener("resize", () => { that.resize(); });
 
+
+  },
+  
+  resizePool: {},
+  
+  addResize(name, func) {
+    this.resizePool[name] = func;
+  },
+  
+  removeRize(name) {
+    delete this.resizePool[name];
+  },
+  
+  resize() {
+    for (var key in this.resizePool) this.resizePool[key]();
+  },
+  
   createCamera() {
-    
+
     this.camera = new THREE.PerspectiveCamera(
-      45, 
-      document.body.offsetWidth/document.body.offsetHeight,
+      45,
+      this.renderer.domElement.width / this.renderer.domElement.height,
       1,
       100
     )
 
-  },
+    var that = this;
 
+    this.addResize("resize_camera", () => {
+      that.camera.aspect = that.renderer.domElement.width / that.renderer.domElement.height;
+
+      that.camera.updateProjectionMatrix();
+    });
+  },
+  
   createScene() {
-    this.scene = new THREE.Scene()
-  },
 
+    this.scene = new THREE.Scene();
+  },
+  
   createLight() {
-    this.light1 = new THREE.DirectionalLight(0xffffff, .5)
-    this.scene.add(this.light1)
-    this.light1.position.set(5,5,5)
-  },
+    this.light1 = new THREE.DirectionalLight(0xffffff, .5);
 
+    this.scene.add(this.light1);
+
+    this.light1.position.set(5, 5, 5);
+  },
+  
   addUpdate(name, func) {
-    this.updatePool[name] = func
+    this.updatePool[name] = func;
   },
-
+  
   removeUpdate(name) {
-    delete this.updatePool[name]
+    delete this.updatePool[name];
   },
-
-  updatePool : {},
-
+  
+  updatePool: {},
+  
   update() {
-    this.renderer.render(this.scene, this.camera)
 
-    var that = this
+    this.renderer.render(this.scene, this.camera);
 
-    requestAnimationFrame(() => {that.update()})
+    var that = this;
 
-    for(let key in this.updatePool) this.updatePool[key]() 
+    requestAnimationFrame(() => { that.update(); });
+
+    for (var key in this.updatePool) this.updatePool[key]();
   }
 }
